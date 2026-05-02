@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أسئلة الاجتماعيات - محافظات الوسط (الإصدار الثاني)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&family=Tajawal:wght@500;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background-color: #eef2ff;
+        }
+        .exam-paper {
+            background-color: #ffffff;
+            background-image: repeating-linear-gradient(0deg, transparent, transparent 39px, #e0e7ff 39px, #e0e7ff 40px);
+        }
+        @media print {
+            body { background-color: white; }
+            .no-print { display: none !important; }
+            .print-break { page-break-before: always; }
+            .exam-container { box-shadow: none !important; border: 2px solid #1e3a8a !important; background-image: none !important; }
+        }
+        .question-number {
+            color: #1e40af;
+            font-weight: 900;
+        }
+        .modal-bg {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(4px);
+        }
+    </style>
+</head>
+<body class="py-10 px-4 text-gray-900">
+
+    <!-- شريط التحكم -->
+    <div class="max-w-4xl mx-auto mb-6 flex flex-wrap gap-4 justify-between items-center no-print">
+        <button onclick="window.print()" class="bg-indigo-900 hover:bg-indigo-950 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-300 flex items-center">
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+            طباعة الأسئلة
+        </button>
+        <button onclick="openAuthModal()" class="bg-amber-500 hover:bg-amber-600 text-white font-bold py-2 px-6 rounded-lg shadow-lg transition duration-300 flex items-center">
+            <svg class="w-5 h-5 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            لوحة المصحح (الأجوبة)
+        </button>
+    </div>
+
+    <!-- النافذة المنبثقة للرمز السري -->
+    <div id="authModal" class="fixed inset-0 modal-bg flex items-center justify-center z-50 hidden no-print">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full text-center border-t-4 border-indigo-700 transform transition-all">
+            <div class="mb-4 text-indigo-700">
+                <svg class="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+            </div>
+            <h3 class="text-2xl font-bold text-gray-800 mb-2 font-['Tajawal']">منطقة مقيدة</h3>
+            <p class="text-gray-500 mb-6 text-sm">أدخل رمز المصحح السري لعرض الأجوبة النموذجية.</p>
+            
+            <input type="password" id="secretCodeInput" class="w-full text-center text-2xl tracking-[0.5em] border-2 border-gray-300 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 rounded-lg p-3 mb-4 outline-none transition" placeholder="••••" maxlength="4">
+            
+            <p id="errorMsg" class="text-red-500 text-sm font-bold mb-4 hidden">الرمز غير صحيح، حاول مجدداً.</p>
+            
+            <div class="flex gap-3">
+                <button onclick="closeAuthModal()" class="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 rounded-lg transition">إلغاء</button>
+                <button onclick="verifyCode()" class="flex-1 bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-2 rounded-lg transition">تأكيد الرمز</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ورقة الامتحان -->
+    <div class="exam-container max-w-4xl mx-auto border-4 border-indigo-900 p-8 shadow-2xl relative exam-paper rounded-xl">
+        
+        <!-- الترويسة -->
+        <div class="flex flex-col md:flex-row justify-between items-center border-b-4 border-indigo-900 pb-4 mb-8 text-center md:text-right">
+            <div class="mb-4 md:mb-0 w-full md:w-1/3 leading-relaxed font-bold text-indigo-950">
+                جمهورية العراق<br>
+                وزارة التربية<br>
+                اللجنة الدائمة للامتحانات
+            </div>
+            <div class="mb-4 md:mb-0 w-full md:w-1/3 text-center">
+                <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5b/Emblem_of_Iraq.svg/100px-Emblem_of_Iraq.svg.png" alt="شعار الجمهورية" class="h-16 mx-auto mb-2 grayscale opacity-90">
+                <h1 class="font-black text-2xl md:text-3xl text-indigo-900 tracking-wide">الامتحان التأكيدي - الإصدار الثاني</h1>
+                <h2 class="font-bold text-lg text-indigo-800 mt-1">مادة الاجتماعيات - السادس الابتدائي</h2>
+            </div>
+            <div class="w-full md:w-1/3 md:text-left leading-relaxed font-bold text-indigo-950">
+                الموضوع: من كركوك إلى بغداد<br>
+                الوقت المخصص: ساعتان<br>
+                الدرجة الكلية: (100 درجة)
+            </div>
+        </div>
+
+        <!-- ملاحظة -->
+        <div class="text-center font-bold text-lg bg-indigo-100 py-3 border-2 border-indigo-300 rounded mb-8 shadow-sm">
+            ملاحظة: أجب عن (خمسة) أسئلة فقط، ولكل سؤال (20) درجة.
+        </div>
+
+        <!-- الأسئلة -->
+        <div class="space-y-8 text-lg font-medium text-slate-900">
+            
+            <!-- السؤال الأول -->
+            <div class="relative bg-white/90 p-4 rounded-lg border border-indigo-100 shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-bold text-xl flex items-center"><span class="question-number text-2xl ml-2">س1/</span> عّرف خمسة مما يأتي:</h3>
+                    <span class="text-sm font-bold text-indigo-700 border border-indigo-300 px-3 py-1 rounded bg-white shadow-sm">(20 درجة)</span>
+                </div>
+                <div class="pr-8 grid grid-cols-2 md:grid-cols-3 gap-5 font-bold text-indigo-950">
+                    <p>1- تكريت</p>
+                    <p>2- المشهد الكاظمي</p>
+                    <p>3- طريق خراسان</p>
+                    <p>4- مناخ السهوب</p>
+                    <p>5- كركر</p>
+                    <p>6- حقل نفط خانة</p>
+                </div>
+            </div>
+
+            <!-- السؤال الثاني -->
+            <div class="relative bg-white/90 p-4 rounded-lg border border-indigo-100 shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-bold text-xl flex items-center"><span class="question-number text-2xl ml-2">س2/</span> املأ الفراغات الآتية بما يناسبها (لخمسٍ فقط):</h3>
+                    <span class="text-sm font-bold text-indigo-700 border border-indigo-300 px-3 py-1 rounded bg-white shadow-sm">(20 درجة)</span>
+                </div>
+                <div class="pr-8 space-y-4 leading-relaxed font-semibold">
+                    <p>1- تقع محافظة كركوك في منطقة انتقالية بين المنطقة المتموجة ومنطقة .....................</p>
+                    <p>2- من أهم الحقول النفطية في محافظة كركوك حقل بابا كركر وحقل جمبور وحقل .....................</p>
+                    <p>3- تقسم العاصمة بغداد بواسطة نهر دجلة إلى جانبين هما الكرخ و .....................</p>
+                    <p>4- تقع محافظة صلاح الدين ضمن المنطقة ..................... الحارة.</p>
+                    <p>5- يُعد مرقد الإمام ..................... مؤسس المذهب الحنفي من أهم المعالم التاريخية في بغداد.</p>
+                    <p>6- من أهم معالم مدينة سامراء قصر العاشق و .....................</p>
+                </div>
+            </div>
+
+            <!-- السؤال الثالث -->
+            <div class="relative bg-white/90 p-4 rounded-lg border border-indigo-100 shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-bold text-xl flex items-center"><span class="question-number text-2xl ml-2">س3/</span> ضع كلمة (صح) أمام العبارة الصحيحة وكلمة (خطأ) أمام العبارة غير الصحيحة (لخمسٍ فقط):</h3>
+                    <span class="text-sm font-bold text-indigo-700 border border-indigo-300 px-3 py-1 rounded bg-white shadow-sm">(20 درجة)</span>
+                </div>
+                <div class="pr-8 space-y-4 font-semibold">
+                    <p>1- يتميز سطح محافظة بغداد بالارتفاعات العالية والجبال الشاهقة. ( )</p>
+                    <p>2- سميت محافظة صلاح الدين بهذا الاسم نسبة إلى القائد صلاح الدين الأيوبي. ( )</p>
+                    <p>3- تقع مدينة سامراء التاريخية في محافظة كركوك. ( )</p>
+                    <p>4- بنى الخليفة العباسي أبو جعفر المنصور مدينة بغداد المدورة سنة 145 هـ. ( )</p>
+                    <p>5- يعد نهر العظيم الشريان الحيوي لجميع الأنشطة في العاصمة بغداد. ( )</p>
+                    <p>6- تضم محافظة ديالى حقولاً نفطية من أهمها حقول نفط خانة. ( )</p>
+                </div>
+            </div>
+
+            <!-- السؤال الرابع -->
+            <div class="relative bg-white/90 p-4 rounded-lg border border-indigo-100 shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-bold text-xl flex items-center"><span class="question-number text-2xl ml-2">س4/</span> أجب عن فرعين فقط:</h3>
+                    <span class="text-sm font-bold text-indigo-700 border border-indigo-300 px-3 py-1 rounded bg-white shadow-sm">(20 درجة)</span>
+                </div>
+                <div class="pr-8 space-y-6">
+                    <div>
+                        <p class="font-bold mb-3 text-indigo-900 border-r-4 border-indigo-500 pr-2">فرع (أ) - علل اثنين مما يأتي: <span class="text-sm font-normal text-slate-500">(10 درجات)</span></p>
+                        <ul class="list-decimal list-inside space-y-2 pr-4 bg-indigo-50 p-4 rounded border border-indigo-200 font-semibold">
+                            <li>تسمية مدينة تكريت بهذا الاسم قديماً.</li>
+                            <li>أهمية الموقع الجغرافي لمحافظة كركوك.</li>
+                            <li>تسمية مدينة بعقوبة بهذا الاسم قديماً.</li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p class="font-bold mb-3 text-indigo-900 border-r-4 border-indigo-500 pr-2">فرع (ب) - انسب المعالم والمشاريع الآتية إلى المحافظة التي تقع فيها: <span class="text-sm font-normal text-slate-500">(10 درجات)</span></p>
+                        <div class="bg-indigo-50 p-4 rounded border border-indigo-200 text-center font-bold text-indigo-900 text-xl tracking-wide">
+                            ( جامع أبي دلف ، سد حمرين ، بابا كركر ، المدرسة المستنصرية )
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- السؤال الخامس -->
+            <div class="relative bg-white/90 p-4 rounded-lg border border-indigo-100 shadow-sm">
+                <div class="flex justify-between items-start mb-4">
+                    <h3 class="font-bold text-xl flex items-center"><span class="question-number text-2xl ml-2">س5/</span> أجب عن الفرعين الآتيين:</h3>
+                    <span class="text-sm font-bold text-indigo-700 border border-indigo-300 px-3 py-1 rounded bg-white shadow-sm">(20 درجة)</span>
+                </div>
+                <div class="pr-8 space-y-6">
+                    <div>
+                        <p class="font-bold mb-3 text-indigo-900 border-r-4 border-indigo-500 pr-2">فرع (أ): <span class="text-sm font-normal text-slate-500">(10 درجات)</span></p>
+                        <div class="bg-blue-50 p-4 rounded border border-blue-200 font-semibold">
+                            ارسم خريطة العراق، موضحاً عليها: (نهر دجلة، محافظة كركوك، محافظة صلاح الدين، العاصمة بغداد).
+                        </div>
+                    </div>
+                    <div>
+                        <p class="font-bold mb-3 text-indigo-900 border-r-4 border-indigo-500 pr-2">فرع (ب): <span class="text-sm font-normal text-slate-500">(10 درجات)</span></p>
+                        <div class="bg-blue-50 p-4 rounded border border-blue-200 leading-relaxed font-semibold">
+                            تحدث عن مدينة (سامراء) التاريخية، وما هي أبرز أسماءها القديمة؟ واذكر اثنين من معالمها التاريخية.
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="mt-14 text-center text-sm text-indigo-700 font-bold border-t-2 border-indigo-200 pt-6">
+            "التركيز هو سر النجاح.. راجع إجاباتك جيداً ولا تتسرع!"
+        </div>
+    </div>
+
+    <!-- قسم الأجوبة النموذجية (مخفي افتراضياً) -->
+    <div id="answers" class="hidden max-w-4xl mx-auto mt-10 bg-white border-t-8 border-amber-500 p-8 shadow-xl rounded-xl print-break mb-10">
+        <div class="flex justify-between items-center border-b-2 border-amber-100 pb-5 mb-8">
+            <h2 class="font-black text-3xl text-amber-600">دليل الأجوبة النموذجية - الإصدار الثاني</h2>
+            <button onclick="hideAnswers()" class="text-gray-500 hover:text-red-500 transition no-print" title="إغلاق الأجوبة">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+            </button>
+        </div>
+
+        <div class="space-y-8 text-slate-800">
+            <!-- جواب س1 -->
+            <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                <h4 class="font-bold text-xl text-amber-600 mb-4 border-r-4 border-amber-500 pr-3">جواب السؤال الأول (20 درجة):</h4>
+                <ul class="list-disc list-inside space-y-3 pr-4 font-medium">
+                    <li><span class="font-bold text-black">تكريت:</span> مدينة تاريخية في صلاح الدين، وكلمة تكريت سريانية أصلها (تجريت) أي المتجر، لأن أهلها اشتهروا بالتجارة.</li>
+                    <li><span class="font-bold text-black">المشهد الكاظمي:</span> من أهم معالم بغداد، يضم مرقد الإمامين موسى الكاظم ومحمد الجواد (عليهما السلام) ويقع في جانب الكرخ.</li>
+                    <li><span class="font-bold text-black">طريق خراسان:</span> هو الاسم الذي كان يطلق على محافظة ديالى في العهدين العباسي والعثماني.</li>
+                    <li><span class="font-bold text-black">مناخ السهوب:</span> مناخ انتقالي بين مناخ البحر المتوسط شمالاً والمناخ شبه الصحراوي جنوباً، ويسود في كركوك.</li>
+                    <li><span class="font-bold text-black">كركر:</span> هو الاسم الذي اشتق منه اسم (كركوك)، وتعني شعلة النار الملتهبة.</li>
+                    <li><span class="font-bold text-black">حقل نفط خانة:</span> من أهم الحقول النفطية التي تتواجد في محافظة ديالى وتشتهر بها.</li>
+                </ul>
+            </div>
+
+            <!-- جواب س2 -->
+            <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                <h4 class="font-bold text-xl text-amber-600 mb-4 border-r-4 border-amber-500 pr-3">جواب السؤال الثاني (20 درجة):</h4>
+                <ol class="list-decimal list-inside space-y-2 pr-4 font-bold text-black text-lg">
+                    <li>السهل الرسوبي</li>
+                    <li>الأوسط</li>
+                    <li>الرصافة</li>
+                    <li>شبه المدارية</li>
+                    <li>الأعظم (أو أبو حنيفة النعمان)</li>
+                    <li>المعشوق</li>
+                </ol>
+            </div>
+
+            <!-- جواب س3 -->
+            <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                <h4 class="font-bold text-xl text-amber-600 mb-4 border-r-4 border-amber-500 pr-3">جواب السؤال الثالث (20 درجة):</h4>
+                <ol class="list-decimal list-inside space-y-2 pr-4 font-bold text-black text-lg">
+                    <li>( خطأ ) - يتميز بالانبساط التام (السهل الرسوبي).</li>
+                    <li>( صح )</li>
+                    <li>( خطأ ) - تقع في محافظة صلاح الدين.</li>
+                    <li>( صح )</li>
+                    <li>( خطأ ) - نهر دجلة هو الشريان الحيوي לבغداد.</li>
+                    <li>( صح )</li>
+                </ol>
+            </div>
+
+            <!-- جواب س4 -->
+            <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                <h4 class="font-bold text-xl text-amber-600 mb-4 border-r-4 border-amber-500 pr-3">جواب السؤال الرابع (20 درجة):</h4>
+                <div class="mb-6">
+                    <p class="font-bold text-lg text-amber-800 mb-3">فرع (أ) - التعاليل (10 درجات):</p>
+                    <ol class="list-decimal list-inside space-y-3 pr-4 font-medium">
+                        <li><span class="font-bold text-black">تسمية تكريت:</span> كلمة سريانية أصلها جاء من (تجريت) أي المتجر لأن أهلها اشتهروا بالتجارة والبيع.</li>
+                        <li><span class="font-bold text-black">أهمية موقع كركوك:</span> لكونه يمثل الجسر الرابط بين محافظات شمال العراق ومحافظات وسطه وجنوبه.</li>
+                        <li><span class="font-bold text-black">تسمية بعقوبة:</span> ورد اسمها في اللغات الآرامية القديمة وكانت تسمى (با عقوبا) وتعني بيت العقوبة.</li>
+                    </ol>
+                </div>
+                <div class="border-t border-slate-300 pt-5">
+                    <p class="font-bold text-lg text-amber-800 mb-3">فرع (ب) - التنسيب (10 درجات):</p>
+                    <ul class="space-y-2 pr-4 font-bold text-black">
+                        <li>1- جامع أبي دلف <span class="text-amber-600 font-normal mx-2"><--</span> محافظة صلاح الدين.</li>
+                        <li>2- سد حمرين <span class="text-amber-600 font-normal mx-2"><--</span> محافظة ديالى.</li>
+                        <li>3- بابا كركر <span class="text-amber-600 font-normal mx-2"><--</span> محافظة كركوك.</li>
+                        <li>4- المدرسة المستنصرية <span class="text-amber-600 font-normal mx-2"><--</span> العاصمة بغداد.</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- جواب س5 -->
+            <div class="bg-slate-50 p-5 rounded-lg border border-slate-200">
+                <h4 class="font-bold text-xl text-amber-600 mb-4 border-r-4 border-amber-500 pr-3">جواب السؤال الخامس (20 درجة):</h4>
+                <div class="mb-6">
+                    <p class="font-bold text-lg text-amber-800 mb-2">فرع (أ) - الخريطة (10 درجات):</p>
+                    <p class="pr-4 font-medium">ترسم الخريطة مع تأشير <span class="font-bold text-blue-600">نهر دجلة</span> من الشمال للجنوب. تحديد <span class="font-bold text-red-600">كركوك</span>، وأسفل منها للغرب قليلاً <span class="font-bold text-green-600">صلاح الدين</span>، ثم العاصمة <span class="font-bold text-purple-600">بغداد</span> في الوسط.</p>
+                </div>
+                <div class="border-t border-slate-300 pt-5">
+                    <p class="font-bold text-lg text-amber-800 mb-2">فرع (ب) - مدينة سامراء (10 درجات):</p>
+                    <p class="pr-4 font-medium mb-2"><span class="font-bold text-black">أسمائها القديمة:</span> سامرا، سر من رأى، وحصن سومير.</p>
+                    <p class="pr-4 font-medium"><span class="font-bold text-black">معالمها التاريخية (يُذكر اثنان):</span> قصر العاشق والمعشوق، جامع الملوية، دار الخليفة، جامع أبي دلف.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- برمجة نظام الحماية بالرمز السري -->
+    <script>
+        const correctSecret = "1122"; 
+        
+        const modal = document.getElementById('authModal');
+        const input = document.getElementById('secretCodeInput');
+        const errorMsg = document.getElementById('errorMsg');
+        const answersDiv = document.getElementById('answers');
+
+        function openAuthModal() {
+            if (answersDiv.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+                input.value = '';
+                errorMsg.classList.add('hidden');
+                input.focus();
+            } else {
+                hideAnswers(); 
+            }
+        }
+
+        function closeAuthModal() {
+            modal.classList.add('hidden');
+        }
+
+        function verifyCode() {
+            if (input.value === correctSecret) {
+                closeAuthModal();
+                answersDiv.classList.remove('hidden');
+                setTimeout(() => {
+                    answersDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }, 100);
+            } else {
+                errorMsg.classList.remove('hidden');
+                input.value = ''; 
+                input.focus();
+            }
+        }
+
+        function hideAnswers() {
+            answersDiv.classList.add('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
+
+        input.addEventListener("keypress", function(event) {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                verifyCode();
+            }
+        });
+    </script>
+</body>
+</html>
